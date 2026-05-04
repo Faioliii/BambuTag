@@ -42,7 +42,7 @@ If you are not using a reverse-proxy, you can automatically generate a self-sign
 
 ```yaml
 services:
-  # 1. Container for generating the certificate once (can be removed after the first setup)
+  # 1. Einmaliger Container, der nur das Zertifikat erstellt und sich dann beendet
   certificates:
     image: alpine:latest
     container_name: generate-certificates
@@ -56,28 +56,27 @@ services:
       echo 'Generating certificate for localhost...';
       
       if [ ! -f /etc/nginx/ssl/localhost.crt ]; then
-        openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/nginx/ssl/localhost.key -out /etc/nginx/ssl/localhost.crt -subj '/CN=localhost' -addext \"subjectAltName=DNS:localhost,IP:127.0.0.1\";
-        echo 'Certificate successfully created.';
+        openssl req -x509 -nodes -days 365 -newkey rsa:2048 \ -keyout /etc/nginx/ssl/localhost.key \ -out /etc/nginx/ssl/localhost.crt \ -subj '/CN=localhost' \ -addext \"subjectAltName=DNS:localhost,IP:127.0.0.1\";
+        echo 'Certificate successful created.';
       else
-        echo 'Certificate already exists.';
+        echo 'Certificate already existing.';
+        echo 'You can now delete this container if you want. We only needed this container to create a certificate once.';
       fi;
       "
 
-  # 2. The main NGINX webserver
+  # 2. Der eigentliche NGINX-Webserver, der danach startet
   bambutag:
     image: ghcr.io/faioliii/bambutag:latest
     container_name: bambutag
     restart: unless-stopped
     ports:
-      - "${HOST_PORT:-6443}:443"
+      - "${HTTP_PORT:-}:80"
+      - "${HTTPs_PORT:-}:443"
     volumes:
       - ./ssl:/etc/nginx/ssl:ro
-    environment:
-      - NGINX_PORT=443
     depends_on:
       certificates:
         condition: service_completed_successfully
-    pull_policy: always
 ```
 
 **Certificate Warning in LAN**
@@ -92,17 +91,12 @@ If you handle routing or SSL certificates yourself via a reverse-proxy, you do n
 
 ```yaml
   services:
-  bambutag:
-    image: ghcr.io/faioliii/bambutag:latest
-    container_name: bambutag
-    restart: unless-stopped
-    ports:
-      - "${HOST_PORT:-6443}:443"
-    volumes:
-      - ./ssl:/etc/nginx/ssl:ro
-    environment:
-      - NGINX_PORT=443
-    pull_policy: always
+    bambutag:
+      image: ghcr.io/faioliii/bambutag:latest
+      container_name: bambutag
+      restart: unless-stopped
+      ports:
+        - "${HTTP_PORT:-}:80"
 ```
 
 ---
