@@ -1,0 +1,7 @@
+services:
+  bambutag:
+    image: ghcr.io/dein-github-username/bambutag:latest # oder dein Docker-Hub-Name
+    container_name: bambutag
+    restart: unless-stopped
+    ports:
+      - "9080:80"
