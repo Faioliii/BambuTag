@@ -4,13 +4,12 @@ services:
     container_name: bambutag
     restart: unless-stopped
     ports:
-      - "9080:80"
-      - "9443:443"
+      - "${HTTPS_PORT:-9443}:443"
     volumes:
       - ./ssl:/etc/nginx/ssl:rw
     environment:
       - NGINX_PORT=443
-      - LOCAL_IP=192.168.1.174   # Hier kannst du deine Wunsch-IP eintragen oder anpassen
+      - LOCAL_IP=${LOCAL_IP:-192.168.1.174}
     command: >
       sh -c "if [ ! -f /etc/nginx/ssl/localhost.crt ]; then
                apk add --no-cache openssl &&
