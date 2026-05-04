@@ -5,25 +5,19 @@ services:
     container_name: generate-certificates
     volumes:
       - ./ssl:/etc/nginx/ssl:rw
-    environment:
-      - MY_IP=${MY_IP}
     command: >
       sh -c "
       apk update && apk add --no-cache openssl;
       mkdir -p /etc/nginx/ssl;
       
-      IP_ADDR=\"$$MY_IP\";
-      if [ -z \"$$IP_ADDR\" ]; then
-        IP_ADDR=\"127.0.0.1\";
-      fi;
-      
-      echo 'Generiere Zertifikat für IP: ' $$IP_ADDR;
+      echo 'Generating certificate for localhost...';
       
       if [ ! -f /etc/nginx/ssl/localhost.crt ]; then
-        openssl req -x509 -nodes -days 365 -newkey rsa:2048 \ -keyout /etc/nginx/ssl/localhost.key \ -out /etc/nginx/ssl/localhost.crt \ -subj '/CN=localhost' \ -addext \"subjectAltName=DNS:localhost,IP:127.0.0.1,IP:$$IP_ADDR\";
-        echo 'Zertifikat erfolgreich erstellt.';
+        openssl req -x509 -nodes -days 365 -newkey rsa:2048 \ -keyout /etc/nginx/ssl/localhost.key \ -out /etc/nginx/ssl/localhost.crt \ -subj '/CN=localhost' \ -addext \"subjectAltName=DNS:localhost,IP:127.0.0.1\";
+        echo 'Certificate successful created.';
       else
-        echo 'Zertifikat bereits vorhanden.';
+        echo 'Certificate already existing.';
+        echo 'You can now delete this container if you want. We only needed this container to create a certificate once.';
       fi;
       "
 
