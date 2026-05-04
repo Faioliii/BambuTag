@@ -4,8 +4,7 @@ services:
     container_name: bambutag
     restart: unless-stopped
     ports:
-      - "9080:80"    # HTTP-Port (kannst du auch entfernen, wenn du nur noch HTTPS nutzt)
-      - "9443:443"   # HTTPS-Port
+      - "6443:443"   # HTTPS-Port
     volumes:
       - ./ssl:/etc/nginx/ssl:rw
     environment:
