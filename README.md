@@ -30,28 +30,92 @@ If your BambuTag and BamBuddy instances are not hosted under the exact same doma
 
 ---
 
-## 🛠️ Requirements & Deployment via Docker Compose
+## 🔒 HTTPS and NFC Requirements
 
-To run the application via Docker on your server, simply create a `docker-compose.yml` file:
+To use the in-browser NFC functionality, a secure HTTPS connection is strictly required by modern browsers.
+
+
+**Option 1: Without a Reverse-Proxy (Self-Signed Certificate)**
+
+
+If you are not using a reverse-proxy, you can automatically generate a self-signed certificate using the certificates service in your docker-compose.yml. Add the following to your setup:
 
 ```yaml
 services:
+  # 1. Container for generating the certificate once (can be removed after the first setup)
+  certificates:
+    image: alpine:latest
+    container_name: generate-certificates
+    volumes:
+      - ./ssl:/etc/nginx/ssl:rw
+    command: >
+      sh -c "
+      apk update && apk add --no-cache openssl;
+      mkdir -p /etc/nginx/ssl;
+      
+      echo 'Generating certificate for localhost...';
+      
+      if [ ! -f /etc/nginx/ssl/localhost.crt ]; then
+        openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/nginx/ssl/localhost.key -out /etc/nginx/ssl/localhost.crt -subj '/CN=localhost' -addext \"subjectAltName=DNS:localhost,IP:127.0.0.1\";
+        echo 'Certificate successfully created.';
+      else
+        echo 'Certificate already exists.';
+      fi;
+      "
+
+  # 2. The main NGINX webserver
   bambutag:
     image: ghcr.io/faioliii/bambutag:latest
     container_name: bambutag
     restart: unless-stopped
     ports:
-      - "8080:80"
+      - "${HOST_PORT:-6443}:443"
+    volumes:
+      - ./ssl:/etc/nginx/ssl:ro
+    environment:
+      - NGINX_PORT=443
+    depends_on:
+      certificates:
+        condition: service_completed_successfully
+    pull_policy: always
 ```
 
-Run the stack in the background using the following command:
-```bash
-docker compose up -d
+**Certificate Warning in LAN**
+
+When accessing the application from another machine in your local network, your browser will display an untrusted certificate warning (because it is self-signed). This does not restrict the functionality. You can simply accept the warning to proceed.
+
+
+**Option 2: Using a Reverse-Proxy**
+
+
+If you handle routing or SSL certificates yourself via a reverse-proxy, you do not need the extra service. Your docker-compose.yml can be reduced to this single service:
+
+```yaml
+  services:
+  bambutag:
+    image: ghcr.io/faioliii/bambutag:latest
+    container_name: bambutag
+    restart: unless-stopped
+    ports:
+      - "${HOST_PORT:-6443}:443"
+    volumes:
+      - ./ssl:/etc/nginx/ssl:ro
+    environment:
+      - NGINX_PORT=443
+    pull_policy: always
 ```
 
 ---
 
-## ⚙️ Usage
+## ⚙️ Configurable Environment Variables
+
+The following environment variables can be defined in a .env file or in your configuration:
+
+HOST_PORT: Defines the port used on the host machine to reach BambuTag via HTTPS (Default: 6443 if not specified).
+
+---
+
+## 🛠️ Usage
 
 1. **Configure:** Click the gear icon (Settings) in the top right corner to add your BamBuddy URL and API Key.
 2. **Write NFC:** Choose your spool from the list and write the information onto the NFC tag using your phone.
