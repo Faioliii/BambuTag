@@ -1,7 +1,5 @@
 <div align="center">
   <img src="BambuTag.png" width="500" alt="BambuTag-Logo">
-  <br>
-  <!--<em>Abb. 1: BambuTag Benutzeroberfläche auf einem Smartphone</em>-->
 </div>
 
 **BambuTag** is a modern, lightweight Progressive Web App (PWA) that turns your smartphone into a handy NFC scanner. With this application, you can easily expand **BamBuddy** (Spoolman) to scan or write NFC tags for filament spools directly using your mobile device, allowing you to assign them to printer AMS slots without needing a PC.
@@ -59,6 +57,25 @@ docker compose up -d
 2. **Write NFC:** Choose your spool from the list and write the information onto the NFC tag using your phone.
 3. **Scan NFC:** Hold your phone near the tag to automatically open the assignment screen.
 4. **Assign:** Select the desired printer and the corresponding AMS slot.
+
+<div align="center">
+  <table style="border: none; width: 100%; table-layout: fixed;">
+    <tr>
+      <td align="center" style="border: none; vertical-align: middle; padding: 5px;">
+        <img src="Example_img/Overwiev.jpg" height="400" alt="Overview" style="max-width: 100%; border: none; box-shadow: none;">
+      </td>
+      <td align="center" style="border: none; vertical-align: middle; padding: 5px;">
+        <img src="Example_img/settings.jpg" height="400" alt="Settings" style="max-width: 100%; border: none; box-shadow: none;">
+      </td>
+      <td align="center" style="border: none; vertical-align: middle; padding: 5px;">
+        <img src="Example_img/assign_spool.jpg" height="400" alt="Assign Spool" style="max-width: 100%; border: none; box-shadow: none;">
+      </td>
+      <td align="center" style="border: none; vertical-align: middle; padding: 5px;">
+        <img src="Example_img/Write_nfc.jpg" height="400" alt="Write NFC" style="max-width: 100%; border: none; box-shadow: none;">
+      </td>
+    </tr>
+  </table>
+</div>
 
 ---
 
