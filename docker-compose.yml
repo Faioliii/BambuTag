@@ -1,6 +1,6 @@
 services:
   bambutag:
-    image: ghcr.io/dein-github-username/bambutag:latest # oder dein Docker-Hub-Name
+    image: ghcr.io/faioliii/bambutag:latest # oder dein Docker-Hub-Name
     container_name: bambutag
     restart: unless-stopped
     ports:
