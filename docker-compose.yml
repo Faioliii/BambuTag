@@ -1,34 +1,48 @@
 services:
+  # 1. Einmaliger Container, der nur das Zertifikat erstellt und sich dann beendet
+  certificates:
+    image: alpine:latest
+    container_name: generate-certificates
+    volumes:
+      - ./ssl:/etc/nginx/ssl:rw
+    environment:
+      - MY_IP=${MY_IP}
+    command: >
+      sh -c "
+      apk update && apk add --no-cache openssl;
+      mkdir -p /etc/nginx/ssl;
+      
+      IP_ADDR=\"$$MY_IP\";
+      if [ -z \"$$IP_ADDR\" ]; then
+        IP_ADDR=\"127.0.0.1\";
+      fi;
+      
+      echo 'Generiere Zertifikat für IP: ' $$IP_ADDR;
+      
+      if [ ! -f /etc/nginx/ssl/localhost.crt ]; then
+        openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+          -keyout /etc/nginx/ssl/localhost.key \
+          -out /etc/nginx/ssl/localhost.crt \
+          -subj '/CN=localhost' \
+          -addext \"subjectAltName=DNS:localhost,IP:127.0.0.1,IP:$$IP_ADDR\";
+        echo 'Zertifikat erfolgreich erstellt.';
+      else
+        echo 'Zertifikat bereits vorhanden.';
+      fi;
+      "
+
+  # 2. Der eigentliche NGINX-Webserver, der danach startet
   bambutag:
     image: ghcr.io/faioliii/bambutag:latest
     container_name: bambutag
     restart: unless-stopped
     ports:
-      - "${HOST_PORT}:443"
+      - "${HOST_PORT:-6443}:443"
     volumes:
-      - ./ssl:/etc/nginx/ssl:rw
+      - ./ssl:/etc/nginx/ssl:ro
     environment:
       - NGINX_PORT=443
-      - MY_IP=${MY_IP}
-      - HOST_PORT=${HOST_PORT}
-    command: >
-      sh -c "
-      if [ ! -f /etc/nginx/ssl/localhost.crt ]; then
-        echo 'Zertifikat nicht gefunden. Installiere OpenSSL...';
-        apk add --no-cache openssl;
-        echo 'Generiere Zertifikat...';
-        
-        IP_ADDR=\"$MY_IP\";
-        if [ -z \"\$IP_ADDR\" ]; then
-          IP_ADDR=\"127.0.0.1\";
-        fi;
-        echo 'Verwende IP für Zertifikat: ' \$IP_ADDR;
-        
-        openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/nginx/ssl/localhost.key -out /etc/nginx/ssl/localhost.crt -subj '/CN=localhost' -addext 'subjectAltName=DNS:localhost,IP:127.0.0.1,IP:$$IP_ADDR\';
-        echo 'Zertifikat erfolgreich erstellt.';
-      else
-        echo 'Zertifikat bereits vorhanden.';
-      fi;
-      echo 'Starte NGINX...';
-      nginx -g 'daemon off;'"
+    depends_on:
+      certificates:
+        condition: service_completed_successfully
     pull_policy: always
