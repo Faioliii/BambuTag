@@ -1,0 +1,16 @@
+{
+  "name": "BambuTag",
+  "short_name": "BambuTag",
+  "start_url": "/bambutag/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#38bdf8",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/BambuTag.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    }
+  ]
+}
