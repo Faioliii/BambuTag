@@ -20,11 +20,7 @@ services:
       echo 'Generiere Zertifikat für IP: ' $$IP_ADDR;
       
       if [ ! -f /etc/nginx/ssl/localhost.crt ]; then
-        openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
-          -keyout /etc/nginx/ssl/localhost.key \
-          -out /etc/nginx/ssl/localhost.crt \
-          -subj '/CN=localhost' \
-          -addext \"subjectAltName=DNS:localhost,IP:127.0.0.1,IP:$$IP_ADDR\";
+        openssl req -x509 -nodes -days 365 -newkey rsa:2048 \ -keyout /etc/nginx/ssl/localhost.key \ -out /etc/nginx/ssl/localhost.crt \ -subj '/CN=localhost' \ -addext \"subjectAltName=DNS:localhost,IP:127.0.0.1,IP:$$IP_ADDR\";
         echo 'Zertifikat erfolgreich erstellt.';
       else
         echo 'Zertifikat bereits vorhanden.';
