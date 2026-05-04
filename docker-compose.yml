@@ -15,8 +15,18 @@ services:
         echo 'Zertifikat nicht gefunden. Installiere OpenSSL und generiere neue Zertifikate...';
         apk add --no-cache openssl;
         LOCAL_IP=\$$(hostname -i | awk '{print \$1}');
+        
+        # Fallback, falls LOCAL_IP leer bleibt
+        if [ -z \"\$LOCAL_IP\" ]; then
+          echo 'Warnung: hostname -i leer, verwende Standard-IPs...';
+          LOCAL_IP='127.0.0.1';
+        fi;
+        
         echo 'Ermittelte IP-Adresse: \$LOCAL_IP';
+        
+        # OpenSSL-Aufruf ohne leere Erweiterungen
         openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/nginx/ssl/localhost.key -out /etc/nginx/ssl/localhost.crt -subj '/CN=localhost' -addext 'subjectAltName=DNS:localhost,IP:127.0.0.1,IP:'\$LOCAL_IP'';
+        
         echo 'Zertifikat erfolgreich erstellt.';
       else
         echo 'Zertifikat bereits vorhanden. Überspringe Generierung.';
