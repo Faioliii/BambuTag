@@ -1,0 +1,7 @@
+  services:
+    bambutag:
+      image: ghcr.io/faioliii/bambutag:latest
+      container_name: bambutag
+      restart: unless-stopped
+      ports:
+        - "${HTTP_PORT:-}:80"
