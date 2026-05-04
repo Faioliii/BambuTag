@@ -29,4 +29,4 @@ jobs:
           context: .
           push: true
           # Der Tag sorgt dafür, dass dein Image genau den richtigen Namen erhält
-          tags: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:latest
+          tags: ghcr.io/faioliii/bambutag:latest
