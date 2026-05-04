@@ -17,8 +17,14 @@ services:
         echo 'Zertifikat nicht gefunden. Installiere OpenSSL...';
         apk add --no-cache openssl;
         echo 'Generiere Zertifikat...';
-        TARGET_IP=\"$${MY_IP:-127.0.0.1}\";
-        openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/nginx/ssl/localhost.key -out /etc/nginx/ssl/localhost.crt -subj '/CN=localhost' -addext 'subjectAltName=DNS:localhost,IP:127.0.0.1,IP:\$TARGET_IP\';
+        
+        IP_ADDR=\"$MY_IP\";
+        if [ -z \"\$IP_ADDR\" ]; then
+          IP_ADDR=\"127.0.0.1\";
+        fi;
+        echo 'Verwende IP für Zertifikat: ' \$IP_ADDR;
+        
+        openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/nginx/ssl/localhost.key -out /etc/nginx/ssl/localhost.crt -subj '/CN=localhost' -addext 'subjectAltName=DNS:localhost,IP:127.0.0.1,IP:$$IP_ADDR\';
         echo 'Zertifikat erfolgreich erstellt.';
       else
         echo 'Zertifikat bereits vorhanden.';
