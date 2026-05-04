@@ -9,27 +9,18 @@ services:
       - ./ssl:/etc/nginx/ssl:rw
     environment:
       - NGINX_PORT=443
-    # Der Befehl wurde um "set -x" erweitert, damit jeder Schritt in der Konsole ausgegeben wird.
     command: >
       sh -c "
-      set -x;
       if [ ! -f /etc/nginx/ssl/localhost.crt ]; then
         echo 'Zertifikat nicht gefunden. Installiere OpenSSL und generiere neue Zertifikate...';
         apk add --no-cache openssl;
         LOCAL_IP=\$$(hostname -i | awk '{print \$1}');
         echo 'Ermittelte IP-Adresse: \$LOCAL_IP';
-        
-        openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
-        -keyout /etc/nginx/ssl/localhost.key \
-        -out /etc/nginx/ssl/localhost.crt \
-        -subj '/CN=localhost' \
-        -addext \"subjectAltName=DNS:localhost,IP:127.0.0.1,IP:\$${LOCAL_IP}\";
-        
+        openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/nginx/ssl/localhost.key -out /etc/nginx/ssl/localhost.crt -subj '/CN=localhost' -addext 'subjectAltName=DNS:localhost,IP:127.0.0.1,IP:'\$LOCAL_IP'';
         echo 'Zertifikat erfolgreich erstellt.';
       else
         echo 'Zertifikat bereits vorhanden. Überspringe Generierung.';
       fi;
-      
       echo 'Starte NGINX im Vordergrund...';
       nginx -g 'daemon off;'"
     pull_policy: always
