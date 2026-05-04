@@ -90,13 +90,15 @@ When accessing the application from another machine in your local network, your 
 If you handle routing or SSL certificates yourself via a reverse-proxy, you do not need the extra service. Your docker-compose.yml can be reduced to this single service:
 
 ```yaml
-  services:
+    services:
     bambutag:
       image: ghcr.io/faioliii/bambutag:latest
       container_name: bambutag
       restart: unless-stopped
       ports:
         - "${HTTP_PORT:-}:80"
+      volumes:
+      - ./nginx-no-ssl.conf:/etc/nginx/nginx.conf:ro
 ```
 
 ---
