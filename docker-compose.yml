@@ -4,33 +4,34 @@ services:
     container_name: bambutag
     restart: unless-stopped
     ports:
-      - "6443:443"
+      # Verwendet die Variable HOST_PORT aus der .env-Datei
+      - "${HOST_PORT}:443"
     volumes:
       - ./ssl:/etc/nginx/ssl:rw
     environment:
       - NGINX_PORT=443
+      - MY_IP=${MY_IP}
     command: >
       sh -c "
       if [ ! -f /etc/nginx/ssl/localhost.crt ]; then
         echo 'Zertifikat nicht gefunden. Installiere OpenSSL und generiere neue Zertifikate...';
         apk add --no-cache openssl;
-        LOCAL_IP=\$$(hostname -i | awk '{print \$1}');
         
-        # Fallback, falls LOCAL_IP leer bleibt
-        if [ -z \"\$LOCAL_IP\" ]; then
-          echo 'Warnung: hostname -i leer, verwende Standard-IPs...';
-          LOCAL_IP='127.0.0.1';
-        fi;
+        # Nutze entweder die MY_IP aus der Umgebung oder den Fallback auf 127.0.0.1
+        TARGET_IP=\"$${MY_IP:-127.0.0.1}\";
         
-        echo 'Ermittelte IP-Adresse: \$LOCAL_IP';
+        echo 'Ermittelte bzw. mitgegebene IP-Adresse: $TARGET_IP';
         
-        # OpenSSL-Aufruf ohne leere Erweiterungen
-        openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/nginx/ssl/localhost.key -out /etc/nginx/ssl/localhost.crt -subj '/CN=localhost' -addext 'subjectAltName=DNS:localhost,IP:127.0.0.1,IP:'\$LOCAL_IP'';
+        openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/nginx/ssl/localhost.key -out /etc/nginx/ssl/localhost.crt -subj '/CN=localhost' -addext 'subjectAltName=DNS:localhost,IP:127.0.0.1,IP:'$TARGET_IP'';
         
         echo 'Zertifikat erfolgreich erstellt.';
       else
         echo 'Zertifikat bereits vorhanden. Überspringe Generierung.';
       fi;
+      
+      # NGINX-Port in der Konfiguration dynamisch anpassen
+      sed -i 's/6443/'\"$${HOST_PORT}\"'/g' /etc/nginx/nginx.conf 2>/dev/null || true;
+      
       echo 'Starte NGINX im Vordergrund...';
       nginx -g 'daemon off;'"
     pull_policy: always
