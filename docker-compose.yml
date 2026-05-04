@@ -1,8 +1,23 @@
 services:
   bambutag:
-    image: ghcr.io/faioliii/bambutag:latest # oder dein Docker-Hub-Name
+    image: ghcr.io/faioliii/bambutag:latest # Dein Image oder der Build-Befehl
     container_name: bambutag
     restart: unless-stopped
     ports:
-      - "9080:80"
+      - "9080:80"    # HTTP-Port (kannst du auch entfernen, wenn du nur noch HTTPS nutzt)
+      - "9443:443"   # HTTPS-Port
+    volumes:
+      - ./ssl:/etc/nginx/ssl:rw
+    environment:
+      - NGINX_PORT=443
+    command: >
+      sh -c "if [ ! -f /etc/nginx/ssl/localhost.crt ]; then
+               apk add --no-cache openssl &&
+               openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+               -keyout /etc/nginx/ssl/localhost.key \
+               -out /etc/nginx/ssl/localhost.crt \
+               -subj \"/CN=localhost\" \
+               -addext \"subjectAltName=DNS:localhost,IP:127.0.0.1,IP:192.168.1.174\";
+             fi &&
+             nginx -g 'daemon off;'"
     pull_policy: always
