@@ -4,7 +4,7 @@ services:
     container_name: bambutag
     restart: unless-stopped
     ports:
-      - "9443:443"
+      - "6443:443"
     volumes:
       - ./ssl:/etc/nginx/ssl:rw
     environment:
