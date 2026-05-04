@@ -1,7 +1,7 @@
 {
   "name": "BambuTag",
   "short_name": "BambuTag",
-  "start_url": "/bambutag/",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#0f172a",
   "theme_color": "#38bdf8",
