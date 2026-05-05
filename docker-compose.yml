@@ -1,27 +1,4 @@
 services:
-  # 1. Einmaliger Container, der nur das Zertifikat erstellt und sich dann beendet
-  certificates:
-    image: alpine:latest
-    container_name: generate-certificates
-    volumes:
-      - ./ssl:/etc/nginx/ssl:rw
-    command: >
-      sh -c "
-      apk update && apk add --no-cache openssl;
-      mkdir -p /etc/nginx/ssl;
-      
-      echo 'Generating certificate for localhost...';
-      
-      if [ ! -f /etc/nginx/ssl/localhost.crt ]; then
-        openssl req -x509 -nodes -days 365 -newkey rsa:2048 \ -keyout /etc/nginx/ssl/localhost.key \ -out /etc/nginx/ssl/localhost.crt \ -subj '/CN=localhost' \ -addext \"subjectAltName=DNS:localhost,IP:127.0.0.1\";
-        echo 'Certificate successful created.';
-      else
-        echo 'Certificate already existing.';
-        echo 'You can now delete this container if you want. We only needed this container to create a certificate once.';
-      fi;
-      "
-
-  # 2. Der eigentliche NGINX-Webserver, der danach startet
   bambutag:
     image: ghcr.io/faioliii/bambutag:latest
     container_name: bambutag
@@ -29,8 +6,3 @@ services:
     ports:
       - "${HTTP_PORT:-}:80"
       - "${HTTPS_PORT:-}:443"
-    volumes:
-      - ./ssl:/etc/nginx/ssl:ro
-    depends_on:
-      certificates:
-        condition: service_completed_successfully
