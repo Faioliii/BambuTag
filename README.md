@@ -28,7 +28,7 @@ To use BambuTag without any issues, specific technical requirements for HTTPS an
 
 ### 1. NFC Support & HTTPS Requirement
 
-* **Supported Browsers:** Ensure you are using an NFC-compatible browser (such as Chrome for Android or Safari on iOS).
+* **Supported Browsers:** Ensure you are using an NFC-compatible browser (such as Chrome for Android).
 
 * **Secure Connection:** Ensure you are creating a secure connection (HTTPS) since modern browser don't allow NFC for insecure sites. *(Certificate-errors don't mather as long as it's HTTPS)*
 
