@@ -22,92 +22,60 @@ Because this application does not use server-side authentication and stores your
 
 ---
 
-## 🌐 CORS (Cross-Origin Resource Sharing) Notice
+## 🌐 Network & Security Setup
 
-If your BambuTag and BamBuddy instances are not hosted under the exact same domain, modern browsers will block the API requests with a CORS error. In this case, you will need to set up an API Proxy. 
+To use BambuTag without any issues, specific technical requirements for HTTPS and CORS must be met.
 
-**Recommended Proxy:** [`testcab/cors-anywhere:latest`]([https://hub.docker.com/r/testcab/cors-anywhere](https://hub.docker.com/r/testcab/cors-anywhere)).
+### 1. NFC Support & HTTPS Requirement
+
+* **Supported Browsers:** Ensure you are using an NFC-compatible browser (such as Chrome for Android or Safari on iOS).
+
+* **Secure Connection:** Ensure you are creating a secure connection (HTTPS) since modern browser don't allow NFC for insecure sites. *(Certificate-errors don't mather as long as it's HTTPS)*
+
+### 2. Preventing CORS Errors (Cross-Origin Resource Sharing)
+
+If BambuTag and your BamBuddy instance run on different domains, ports, or IP addresses, modern browsers will block the API requests.
+
+* **The Solution:** Set up an API Proxy.
+
+* **Recommended API-Proxy:** [`testcab/cors-anywhere:latest`](https://hub.docker.com/r/testcab/cors-anywhere).
+
 
 ---
 
-## 🔒 HTTPS and NFC Requirements
+## 🐋 Docker Compose Configuration
 
-To use the in-browser NFC functionality, a secure HTTPS connection is strictly required by modern browsers.
-
-
-**Option 1: Without a Reverse-Proxy (Self-Signed Certificate)**
-
-
-If you are not using a reverse-proxy, you can automatically generate a self-signed certificate using the certificates service in your docker-compose.yml. Add the following to your setup:
+### 1. Only BambuTag
 
 ```yaml
 services:
-  # 1. Einmaliger Container, der nur das Zertifikat erstellt und sich dann beendet
-  certificates:
-    image: alpine:latest
-    container_name: generate-certificates
-    volumes:
-      - ./ssl:/etc/nginx/ssl:rw
-    command: >
-      sh -c "
-      apk update && apk add --no-cache openssl;
-      mkdir -p /etc/nginx/ssl;
-      
-      echo 'Generating certificate for localhost...';
-      
-      if [ ! -f /etc/nginx/ssl/localhost.crt ]; then
-        openssl req -x509 -nodes -days 365 -newkey rsa:2048 \ -keyout /etc/nginx/ssl/localhost.key \ -out /etc/nginx/ssl/localhost.crt \ -subj '/CN=localhost' \ -addext \"subjectAltName=DNS:localhost,IP:127.0.0.1\";
-        echo 'Certificate successful created.';
-      else
-        echo 'Certificate already existing.';
-        echo 'You can now delete this container if you want. We only needed this container to create a certificate once.';
-      fi;
-      "
-
-  # 2. Der eigentliche NGINX-Webserver, der danach startet
   bambutag:
     image: ghcr.io/faioliii/bambutag:latest
     container_name: bambutag
     restart: unless-stopped
     ports:
-      - "${HTTP_PORT:-}:80"
-      - "${HTTPs_PORT:-}:443"
-    volumes:
-      - ./ssl:/etc/nginx/ssl:ro
-    depends_on:
-      certificates:
-        condition: service_completed_successfully
+      - "4080:80"
+      - "4443:443"
 ```
 
-**Certificate Warning in LAN**
-
-When accessing the application from another machine in your local network, your browser will display an untrusted certificate warning (because it is self-signed). This does not restrict the functionality. You can simply accept the warning to proceed.
-
-
-**Option 2: Using a Reverse-Proxy**
-
-
-If you handle routing or SSL certificates yourself via a reverse-proxy, you do not need the extra service. Your docker-compose.yml can be reduced to this single service:
+### 2. BambuTag & API-Proxy
 
 ```yaml
-    services:
-    bambutag:
-      image: ghcr.io/faioliii/bambutag:latest
-      container_name: bambutag
-      restart: unless-stopped
-      ports:
-        - "${HTTP_PORT:-}:80"
-      volumes:
-      - ./nginx-no-ssl.conf:/etc/nginx/nginx.conf:ro
+services:
+  apiproxy:
+    image: 	testcab/cors-anywhere:latest
+    container_name: apiproxy
+    restart: unless-stopped
+    ports:
+      - "4880:8080"
+  bambutag:
+    image: ghcr.io/faioliii/bambutag:latest
+    container_name: bambutag
+    restart: unless-stopped
+    ports:
+      - "4080:80"
+      - "4443:443"
 ```
-
----
-
-## ⚙️ Configurable Environment Variables
-
-The following environment variables can be defined in a .env file or in your configuration:
-
-HOST_PORT: Defines the port used on the host machine to reach BambuTag via HTTPS (Default: 6443 if not specified).
 
 ---
 
