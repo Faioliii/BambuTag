@@ -2,7 +2,7 @@
   <img src="BambuTag.png" width="500" alt="BambuTag-Logo">
 </div>
 
-**BambuTag** is a modern, lightweight Progressive Web App (PWA) that turns your smartphone into a handy NFC scanner. With this application, you can easily expand **BamBuddy** (Spoolman) to scan or write NFC tags for filament spools directly using your mobile device, allowing you to assign them to printer AMS slots without needing a PC.
+**BambuTag** is a modern, lightweight Progressive Web App (PWA) that turns your smartphone into a handy NFC scanner. With this application, you can easily expand **BamBuddy** to scan or write NFC tags for filament spools directly using your mobile device, allowing you to assign them to printer AMS slots without needing a PC.
 
 ---
 
