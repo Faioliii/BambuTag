@@ -1,8 +1,16 @@
 services:
+
+  #apiproxy:
+  #  image: 	testcab/cors-anywhere:latest
+  #  container_name: apiproxy
+  #  restart: unless-stopped
+  #  ports:
+  #    - "4880:8080"
+  
   bambutag:
     image: ghcr.io/faioliii/bambutag:latest
     container_name: bambutag
     restart: unless-stopped
     ports:
-      - "${HTTP_PORT:-}:80"
-      - "${HTTPS_PORT:-}:443"
+      - "4080:80"
+      - "4443:443"
