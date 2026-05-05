@@ -107,6 +107,14 @@ services:
 
 ---
 
+## 🔌Flowchart
+
+<div align="center">
+  <img src="Example_img/bambutag_flow.svg" width="500" alt="BambuTag-Flowchart">
+</div>
+
+---
+
 ## 📄 License
 
 This project is licensed under the GNU General Public License v3.0. For further details, please refer to the `LICENSE` file in the repository.
